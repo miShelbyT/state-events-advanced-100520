@@ -3,28 +3,48 @@ import "./App.css";
 import BeyContainer from './Containers/BeyContainer'
 import Favorites from './Containers/Favorites'
 
+
 class App extends React.Component {
 
   state = {
-    favedBeyCards: []
+    api: []
   }
 
-  faveABeyCard = (beyObj) => {
-      // console.log("I am working in the BeyCard Component", beyObj)
-      this.setState(prevState => ({
-        favedBeyCards: [...prevState.favedBeyCards, beyObj]
-      }))
+  componentDidMount() {
+    fetch("http://localhost:4000/beyArray")
+      .then(resp => resp.json())
+      .then(beyArray => this.setState({ api: beyArray }))
+      .catch(console.log)
+
   }
 
-  removeABeyCard = (beyObj) => {
-    console.log("I am removing a bey card eventually...")
+  faveClickHandler = (beyObj) => {
+    let newArray = [...this.state.api]
+    let foundObj = newArray.find(bey => bey.id === beyObj.id)
+    if (foundObj.favorite === false) {
+      foundObj.favorite = true
+      this.setState({ api: newArray })
+      // console.log(this.state.api)
+    }
+    else if (foundObj.favorite === true) {
+      foundObj.favorite = false
+      window.alert("I got a hot sauce 🌶 💃🏽 in my bag, swag")
+      this.setState({ api: newArray })
+      // console.log(this.state.api)
+    }
   }
+
+  favedBeyCards = () => {
+    return this.state.api.filter(beyObj => beyObj.favorite === true)
+    
+  }
+
 
   render() {
     return (
       <div className="container" >
-        <BeyContainer faveABeyCard={this.faveABeyCard} />
-        <Favorites favedBeyCards={this.state.favedBeyCards} removeABeyCard={this.removeABeyCard} />
+        <BeyContainer api={this.state.api} clickHandler={this.faveClickHandler} />
+        <Favorites favedBeyCards={this.favedBeyCards()} clickHandler={this.faveClickHandler} />
       </div>
     );
   }
